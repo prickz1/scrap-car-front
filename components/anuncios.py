@@ -1,0 +1,55 @@
+import streamlit as st
+
+from services.carro_service import listar_anuncios
+
+
+def render_anuncios(filtros: dict, resultado: dict) -> None:
+    """Renderiza o botão e a lista de anúncios com comparativo de preço."""
+
+    if st.button("Mostrar Anúncios"):
+        with st.spinner(""):
+            anuncios = listar_anuncios(
+                filtros["marca"], filtros["modelo"], filtros["ano"],
+                filtros["cambio"], filtros["combustivel"], filtros["direcao"],
+            )
+        st.session_state["anuncios"] = anuncios
+
+    anuncios = st.session_state.get("anuncios")
+    if anuncios is None:
+        return
+
+    if not anuncios:
+        st.info("Nenhum anúncio encontrado com esses filtros.")
+        return
+
+    st.subheader(f"{len(anuncios)} anúncio(s) encontrado(s)")
+    for a in anuncios:
+        km = f"{int(a['quilometragem']):,} km" if a.get("quilometragem") else "km não informado"
+        cor = a.get("cor") or "—"
+        local = f"{a.get('cidade') or ''}{'/' + a['estado'] if a.get('estado') else ''}".strip("/")
+        titulo = a.get("titulo") or f"{filtros['marca']} {filtros['modelo']} {filtros['ano']}"
+        url = a.get("url_anuncio") or "#"
+        preco_real = a["preco"]
+
+        with st.container(border=True):
+            ncols = 2 + (1 if "geral" in resultado else 0) + (1 if "popular" in resultado else 0)
+            cols = st.columns(ncols)
+
+            with cols[0]:
+                st.markdown(f"**{titulo}**")
+                st.caption(f"{km} · {cor} · {local}")
+            with cols[1]:
+                st.metric("Preço anunciado", f"R$ {preco_real:,.0f}")
+
+            col_idx = 2
+            if "geral" in resultado:
+                diff = resultado["geral"] - preco_real
+                label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
+                cols[col_idx].metric("Modelo Geral", f"R$ {resultado['geral']:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
+                col_idx += 1
+            if "popular" in resultado:
+                diff = resultado["popular"] - preco_real
+                label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
+                cols[col_idx].metric("Modelo Popular", f"R$ {resultado['popular']:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
+
+            st.markdown(f'<a href="{url}" target="_blank">Ver anúncio →</a>', unsafe_allow_html=True)

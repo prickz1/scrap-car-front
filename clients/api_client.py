@@ -51,6 +51,17 @@ def get_direcoes(marca: str, modelo: str, ano: int) -> list[str]:
         return []
 
 
+def get_anuncios(marca: str, modelo: str, ano: int, cambio: str, combustivel: str, direcao: str) -> list[dict]:
+    try:
+        r = requests.get(f"{_BASE}/ml/anuncios", params={
+            "marca": marca, "modelo": modelo, "ano": ano,
+            "cambio": cambio, "combustivel": combustivel, "direcao": direcao,
+        }).json()
+        return r if isinstance(r, list) else []
+    except Exception:
+        return []
+
+
 def get_previsao(
     marca: str,
     modelo: str,

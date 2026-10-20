@@ -6,6 +6,7 @@ from clients.api_client import (
     get_combustiveis,
     get_direcoes,
     get_previsao,
+    get_anuncios,
 )
 
 
@@ -31,6 +32,10 @@ def listar_combustiveis(marca: str, modelo: str, ano: int) -> list[str]:
 
 def listar_direcoes(marca: str, modelo: str, ano: int) -> list[str]:
     return get_direcoes(marca, modelo, ano)
+
+
+def listar_anuncios(marca: str, modelo: str, ano: int, cambio: str, combustivel: str, direcao: str) -> list[dict]:
+    return get_anuncios(marca, modelo, ano, cambio, combustivel, direcao)
 
 
 def prever_preco(
