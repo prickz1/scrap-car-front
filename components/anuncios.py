@@ -32,7 +32,8 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
         preco_real = a["preco"]
 
         with st.container(border=True):
-            ncols = 2 + (1 if "geral" in resultado else 0) + (1 if "popular" in resultado else 0)
+            tem_faixas = "faixas" in resultado
+            ncols = 2 + (1 if "geral" in resultado else 0) + (1 if "popular" in resultado else 0) + (1 if tem_faixas else 0)
             cols = st.columns(ncols)
 
             with cols[0]:
@@ -51,5 +52,12 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
                 diff = resultado["popular"] - preco_real
                 label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
                 cols[col_idx].metric("Modelo Popular", f"R$ {resultado['popular']:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
+                col_idx += 1
+            if tem_faixas:
+                preco_faixa = resultado["faixas"]["preco"]
+                faixa_label = resultado["faixas"]["faixa"]
+                diff = preco_faixa - preco_real
+                label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
+                cols[col_idx].metric(f"Faixa ({faixa_label})", f"R$ {preco_faixa:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
 
             st.markdown(f'<a href="{url}" target="_blank">Ver anúncio →</a>', unsafe_allow_html=True)

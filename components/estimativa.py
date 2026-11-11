@@ -4,8 +4,6 @@ from services.carro_service import prever_preco
 
 
 def render_estimativa(filtros: dict) -> dict | None:
-    """Renderiza o botão de estimativa e exibe o resultado. Retorna o resultado ou None."""
-
     if st.button("Estimar Preço Justo"):
         with st.spinner(""):
             resultado = prever_preco(
@@ -25,12 +23,16 @@ def render_estimativa(filtros: dict) -> dict | None:
     st.subheader("Estimativa de Preço Justo")
     modelos_resultado = []
     if "geral" in resultado:
-        modelos_resultado.append(("Modelo Geral", resultado["geral"]))
+        modelos_resultado.append(("Modelo Geral", resultado["geral"], None))
     if "popular" in resultado:
-        modelos_resultado.append(("Modelo Popular", resultado["popular"]))
+        modelos_resultado.append(("Modelo Popular", resultado["popular"], None))
+    if "faixas" in resultado:
+        faixas = resultado["faixas"]
+        label = f"Modelo por Faixa ({faixas['faixa']})"
+        modelos_resultado.append((label, faixas["preco"], None))
 
     colunas = st.columns(len(modelos_resultado))
-    for col, (label, preco) in zip(colunas, modelos_resultado):
+    for col, (label, preco, _) in zip(colunas, modelos_resultado):
         col.metric(label, f"R$ {preco:,.0f}")
 
     return resultado
