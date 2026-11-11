@@ -9,6 +9,8 @@ from services.carro_service import (
     listar_direcoes,
 )
 
+MARCAS_POPULARES = {"Fiat", "VW", "Volkswagen", "Chevrolet", "Ford", "Hyundai", "Renault", "Toyota", "Honda", "Jeep"}
+
 FAIXAS_KM = {
     "Até 20.000 km":        10_000,
     "20.000 – 40.000 km":   30_000,
@@ -17,6 +19,16 @@ FAIXAS_KM = {
     "80.000 – 100.000 km":  90_000,
     "100.000 – 150.000 km": 125_000,
     "Acima de 150.000 km":  175_000,
+}
+
+FAIXAS_KM_RANGE = {
+    "Até 20.000 km":        (0,       20_000),
+    "20.000 – 40.000 km":   (20_000,  40_000),
+    "40.000 – 60.000 km":   (40_000,  60_000),
+    "60.000 – 80.000 km":   (60_000,  80_000),
+    "80.000 – 100.000 km":  (80_000,  100_000),
+    "100.000 – 150.000 km": (100_000, 150_000),
+    "Acima de 150.000 km":  (150_000, None),
 }
 
 
@@ -50,10 +62,47 @@ def _direcoes(marca, modelo, ano):
     return listar_direcoes(marca, modelo, ano)
 
 
-def render_filtros() -> dict | None:
-    """Renderiza os filtros em cascata. Retorna dict com os valores ou None se incompleto."""
+_INFO_GERAL = (
+    "Treinado com todos os carros do banco (70.720 registros).\n"
+    "• R² = 0.86 — erra em média R$ 8.453\n"
+    "• Cobre todas as marcas e modelos disponíveis\n"
+    "• Menor precisão por incluir carros de luxo e exóticos junto com populares"
+)
 
-    marca = st.selectbox("Marca", ["Selecione..."] + _marcas())
+_INFO_POPULAR = (
+    "Treinado apenas com as 9 marcas mais vendidas no Brasil (58.735 registros).\n"
+    "• R² = 0.95 — erra em média R$ 5.303\n"
+    "• Marcas: Fiat, VW, Chevrolet, Ford, Hyundai, Renault, Toyota, Honda, Jeep\n"
+    "• Mais preciso, porém limitado a essas marcas"
+)
+
+
+def render_filtros() -> dict | None:
+    modelo_escolhido = st.radio(
+        "Escolha o modelo de estimativa",
+        options=["Modelo Geral", "Modelo Popular"],
+        index=None,
+        horizontal=True,
+        captions=[
+            "R²=0.86 · Todas as marcas",
+            "R²=0.95 · 9 marcas populares",
+        ],
+    )
+
+    if modelo_escolhido == "Modelo Geral":
+        st.info(_INFO_GERAL, icon="ℹ️")
+    elif modelo_escolhido == "Modelo Popular":
+        st.info(_INFO_POPULAR, icon="ℹ️")
+    else:
+        return None
+
+    st.divider()
+
+    todas_marcas = _marcas()
+    if modelo_escolhido == "Modelo Popular":
+        todas_marcas = [m for m in todas_marcas if m in MARCAS_POPULARES]
+
+    marca = st.selectbox("Marca", ["Selecione..."] + todas_marcas)
     if marca == "Selecione...":
         return None
 
@@ -87,6 +136,7 @@ def render_filtros() -> dict | None:
 
     faixa_km = st.selectbox("Quilometragem", list(FAIXAS_KM.keys()), key=f"km_{marca}_{modelo}_{ano}")
 
+    km_min, km_max = FAIXAS_KM_RANGE[faixa_km]
     return {
         "marca": marca,
         "modelo": modelo,
@@ -96,4 +146,7 @@ def render_filtros() -> dict | None:
         "direcao": direcao,
         "faixa_km": faixa_km,
         "quilometragem": FAIXAS_KM[faixa_km],
+        "km_min": km_min,
+        "km_max": km_max,
+        "modelo_escolhido": modelo_escolhido,
     }

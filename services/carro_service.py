@@ -34,8 +34,11 @@ def listar_direcoes(marca: str, modelo: str, ano: int) -> list[str]:
     return get_direcoes(marca, modelo, ano)
 
 
-def listar_anuncios(marca: str, modelo: str, ano: int, cambio: str, combustivel: str, direcao: str) -> list[dict]:
-    return get_anuncios(marca, modelo, ano, cambio, combustivel, direcao)
+def listar_anuncios(
+    marca: str, modelo: str, ano: int, cambio: str, combustivel: str, direcao: str,
+    km_min: int = 0, km_max: int | None = None,
+) -> list[dict]:
+    return get_anuncios(marca, modelo, ano, cambio, combustivel, direcao, km_min, km_max)
 
 
 def prever_preco(

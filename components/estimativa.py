@@ -21,18 +21,13 @@ def render_estimativa(filtros: dict) -> dict | None:
         return None
 
     st.subheader("Estimativa de Preço Justo")
-    modelos_resultado = []
-    if "geral" in resultado:
-        modelos_resultado.append(("Modelo Geral", resultado["geral"], None))
-    if "popular" in resultado:
-        modelos_resultado.append(("Modelo Popular", resultado["popular"], None))
-    if "faixas" in resultado:
-        faixas = resultado["faixas"]
-        label = f"Modelo por Faixa ({faixas['faixa']})"
-        modelos_resultado.append((label, faixas["preco"], None))
 
-    colunas = st.columns(len(modelos_resultado))
-    for col, (label, preco, _) in zip(colunas, modelos_resultado):
-        col.metric(label, f"R$ {preco:,.0f}")
+    escolha = filtros["modelo_escolhido"]
+    chave = "geral" if escolha == "Modelo Geral" else "popular"
 
+    if chave not in resultado:
+        st.warning(f"{escolha} não disponível para essa marca. Tente o Modelo Geral.")
+        return None
+
+    st.metric(escolha, f"R$ {resultado[chave]:,.0f}")
     return resultado

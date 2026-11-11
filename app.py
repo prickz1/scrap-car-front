@@ -12,7 +12,7 @@ if filtros is None:
     st.stop()
 
 # reseta resultado e anúncios ao mudar qualquer filtro
-filtro_key = "|".join(str(filtros[k]) for k in ["marca", "modelo", "ano", "cambio", "combustivel", "direcao", "faixa_km"])
+filtro_key = "|".join(str(filtros[k]) for k in ["marca", "modelo", "ano", "cambio", "combustivel", "direcao", "faixa_km", "modelo_escolhido"])
 if st.session_state.get("filtro_key") != filtro_key:
     st.session_state["filtro_key"] = filtro_key
     st.session_state["resultado"] = None

@@ -11,6 +11,8 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
             anuncios = listar_anuncios(
                 filtros["marca"], filtros["modelo"], filtros["ano"],
                 filtros["cambio"], filtros["combustivel"], filtros["direcao"],
+                km_min=filtros.get("km_min", 0),
+                km_max=filtros.get("km_max"),
             )
         st.session_state["anuncios"] = anuncios
 
@@ -32,9 +34,9 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
         preco_real = a["preco"]
 
         with st.container(border=True):
-            tem_faixas = "faixas" in resultado
-            ncols = 2 + (1 if "geral" in resultado else 0) + (1 if "popular" in resultado else 0) + (1 if tem_faixas else 0)
-            cols = st.columns(ncols)
+            escolha = filtros.get("modelo_escolhido", "Modelo Geral")
+            chave = "geral" if escolha == "Modelo Geral" else "popular"
+            cols = st.columns(3)
 
             with cols[0]:
                 st.markdown(f"**{titulo}**")
@@ -42,22 +44,10 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
             with cols[1]:
                 st.metric("Preço anunciado", f"R$ {preco_real:,.0f}")
 
-            col_idx = 2
-            if "geral" in resultado:
-                diff = resultado["geral"] - preco_real
+            if chave in resultado:
+                preco_justo = resultado[chave]
+                diff = preco_justo - preco_real
                 label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
-                cols[col_idx].metric("Modelo Geral", f"R$ {resultado['geral']:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
-                col_idx += 1
-            if "popular" in resultado:
-                diff = resultado["popular"] - preco_real
-                label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
-                cols[col_idx].metric("Modelo Popular", f"R$ {resultado['popular']:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
-                col_idx += 1
-            if tem_faixas:
-                preco_faixa = resultado["faixas"]["preco"]
-                faixa_label = resultado["faixas"]["faixa"]
-                diff = preco_faixa - preco_real
-                label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
-                cols[col_idx].metric(f"Faixa ({faixa_label})", f"R$ {preco_faixa:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
+                cols[2].metric(escolha, f"R$ {preco_justo:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
 
             st.markdown(f'<a href="{url}" target="_blank">Ver anúncio →</a>', unsafe_allow_html=True)
