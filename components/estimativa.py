@@ -1,6 +1,6 @@
 import streamlit as st
 
-from services.carro_service import prever_preco
+from services.carro_service import calcular_media_preco, prever_preco
 
 
 def render_estimativa(filtros: dict) -> dict | None:
@@ -14,6 +14,15 @@ def render_estimativa(filtros: dict) -> dict | None:
         if not resultado:
             st.warning("Modelo ainda carregando. Aguarde alguns instantes e tente novamente.")
             return None
+
+        media = calcular_media_preco(
+            filtros["marca"], filtros["modelo"], filtros["ano"],
+            filtros["cambio"], filtros["combustivel"], filtros["direcao"],
+            km_min=filtros.get("km_min", 0),
+            km_max=filtros.get("km_max"),
+        )
+        resultado["media_anuncios"] = media.get("media")
+        resultado["total_anuncios"] = media.get("total", 0)
         st.session_state["resultado"] = resultado
 
     resultado = st.session_state.get("resultado")
@@ -29,5 +38,17 @@ def render_estimativa(filtros: dict) -> dict | None:
         st.warning(f"{escolha} não disponível para essa marca. Tente o Modelo Geral.")
         return None
 
-    st.metric(escolha, f"R$ {resultado[chave]:,.0f}")
+    cols = st.columns(2)
+    cols[0].metric(escolha, f"R$ {resultado[chave]:,.0f}")
+
+    media = resultado.get("media_anuncios")
+    total = resultado.get("total_anuncios", 0)
+    if media is not None:
+        cols[1].metric(
+            f"Média dos anúncios ({total} encontrados)",
+            f"R$ {media:,.0f}",
+        )
+    else:
+        cols[1].caption("Nenhum anúncio encontrado com esses filtros.")
+
     return resultado

@@ -7,6 +7,7 @@ from clients.api_client import (
     get_direcoes,
     get_previsao,
     get_anuncios,
+    get_media_preco,
 )
 
 
@@ -39,6 +40,13 @@ def listar_anuncios(
     km_min: int = 0, km_max: int | None = None,
 ) -> list[dict]:
     return get_anuncios(marca, modelo, ano, cambio, combustivel, direcao, km_min, km_max)
+
+
+def calcular_media_preco(
+    marca: str, modelo: str, ano: int, cambio: str, combustivel: str, direcao: str,
+    km_min: int = 0, km_max: int | None = None,
+) -> dict:
+    return get_media_preco(marca, modelo, ano, cambio, combustivel, direcao, km_min, km_max)
 
 
 def prever_preco(

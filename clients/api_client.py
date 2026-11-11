@@ -67,6 +67,22 @@ def get_anuncios(
         return []
 
 
+def get_media_preco(
+    marca: str, modelo: str, ano: int, cambio: str, combustivel: str, direcao: str,
+    km_min: int = 0, km_max: int | None = None,
+) -> dict:
+    try:
+        params = {"marca": marca, "modelo": modelo, "ano": ano,
+                  "cambio": cambio, "combustivel": combustivel, "direcao": direcao,
+                  "km_min": km_min}
+        if km_max is not None:
+            params["km_max"] = km_max
+        r = requests.get(f"{_BASE}/ml/media", params=params).json()
+        return r if isinstance(r, dict) else {}
+    except Exception:
+        return {}
+
+
 def get_previsao(
     marca: str,
     modelo: str,

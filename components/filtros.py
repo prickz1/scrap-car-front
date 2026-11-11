@@ -12,6 +12,7 @@ from services.carro_service import (
 MARCAS_POPULARES = {"Fiat", "VW", "Volkswagen", "Chevrolet", "Ford", "Hyundai", "Renault", "Toyota", "Honda", "Jeep"}
 
 FAIXAS_KM = {
+    "Todos (acima de 0 km)": 90_000,
     "Até 20.000 km":        10_000,
     "20.000 – 40.000 km":   30_000,
     "40.000 – 60.000 km":   50_000,
@@ -22,6 +23,7 @@ FAIXAS_KM = {
 }
 
 FAIXAS_KM_RANGE = {
+    "Todos (acima de 0 km)": (0,      None),
     "Até 20.000 km":        (0,       20_000),
     "20.000 – 40.000 km":   (20_000,  40_000),
     "40.000 – 60.000 km":   (40_000,  60_000),
@@ -135,6 +137,12 @@ def render_filtros() -> dict | None:
     direcao = st.selectbox("Direção", direcoes, key=f"d_{marca}_{modelo}_{ano}")
 
     faixa_km = st.selectbox("Quilometragem", list(FAIXAS_KM.keys()), key=f"km_{marca}_{modelo}_{ano}")
+
+    if faixa_km == "Todos (acima de 0 km)":
+        st.warning(
+            "Selecione uma faixa específica para maior precisão.",
+            icon="⚠️",
+        )
 
     km_min, km_max = FAIXAS_KM_RANGE[faixa_km]
     return {
