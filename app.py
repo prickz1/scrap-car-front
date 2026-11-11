@@ -27,4 +27,4 @@ if resultado is None:
 st.divider()
 
 chave = "geral" if filtros["modelo_escolhido"] == "Modelo Geral" else "popular"
-render_anuncios(filtros, resultado.get(chave))
+render_anuncios(filtros, resultado.get(chave), resultado.get("desvio_anuncios"))

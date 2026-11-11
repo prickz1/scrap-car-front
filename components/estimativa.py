@@ -22,6 +22,7 @@ def render_estimativa(filtros: dict) -> dict | None:
             km_max=filtros.get("km_max"),
         )
         resultado["media_anuncios"] = media.get("media")
+        resultado["desvio_anuncios"] = media.get("desvio")
         resultado["total_anuncios"] = media.get("total", 0)
         st.session_state["resultado"] = resultado
 
@@ -42,12 +43,20 @@ def render_estimativa(filtros: dict) -> dict | None:
     cols[0].metric(escolha, f"R$ {resultado[chave]:,.0f}")
 
     media = resultado.get("media_anuncios")
+    desvio = resultado.get("desvio_anuncios")
     total = resultado.get("total_anuncios", 0)
     if media is not None:
         cols[1].metric(
             f"Média dos anúncios ({total} encontrados)",
             f"R$ {media:,.0f}",
+            delta=f"σ R$ {desvio:,.0f}" if desvio is not None else None,
+            delta_color="off",
         )
+        if desvio is not None and abs(resultado[chave] - media) > 1.5 * desvio:
+            st.caption(
+                f"⚠️ A estimativa está fora do desvio padrão dos anúncios "
+                f"(desvio: R$ {desvio:,.0f}). Use com cautela."
+            )
     else:
         cols[1].caption("Nenhum anúncio encontrado com esses filtros.")
 
