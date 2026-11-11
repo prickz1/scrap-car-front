@@ -3,8 +3,7 @@ import streamlit as st
 from services.carro_service import listar_anuncios
 
 
-def render_anuncios(filtros: dict, resultado: dict) -> None:
-    """Renderiza o botão e a lista de anúncios com comparativo de preço."""
+def render_anuncios(filtros: dict, preco_justo: float | None) -> None:
 
     if st.button("Mostrar Anúncios"):
         with st.spinner(""):
@@ -35,7 +34,6 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
 
         with st.container(border=True):
             escolha = filtros.get("modelo_escolhido", "Modelo Geral")
-            chave = "geral" if escolha == "Modelo Geral" else "popular"
             cols = st.columns(3)
 
             with cols[0]:
@@ -44,8 +42,7 @@ def render_anuncios(filtros: dict, resultado: dict) -> None:
             with cols[1]:
                 st.metric("Preço anunciado", f"R$ {preco_real:,.0f}")
 
-            if chave in resultado:
-                preco_justo = resultado[chave]
+            if preco_justo is not None:
                 diff = preco_justo - preco_real
                 label = f"R$ {abs(diff):,.0f} {'abaixo' if diff > 0 else 'acima'} do justo"
                 cols[2].metric(escolha, f"R$ {preco_justo:,.0f}", delta=label, delta_color="normal" if diff > 0 else "inverse")
