@@ -35,24 +35,29 @@ Acessa em `http://localhost:8501`.
 
 ## Fluxo de uso
 
-1. Seleciona a **marca** do carro
-2. Seleciona o **modelo**
-3. Seleciona o **ano**
-4. Seleciona o **câmbio** (opções baseadas no modelo/ano)
-5. Seleciona o **combustível**
-6. Seleciona a **direção**
-7. Seleciona a **faixa de quilometragem**
-8. Clica em **Estimar Preço Justo**
+1. Escolhe o **modelo de estimativa**: Geral (todas as marcas, R²=0.86) ou Popular (9 marcas, R²=0.95)
+2. Seleciona a **marca** (filtrada pelas marcas do modelo escolhido)
+3. Seleciona o **modelo**
+4. Seleciona o **ano**
+5. Seleciona o **câmbio** (opções baseadas no modelo/ano)
+6. Seleciona o **combustível**
+7. Seleciona a **direção**
+8. Seleciona a **faixa de quilometragem**
+9. Clica em **Estimar Preço Justo**
 
-A interface retorna a estimativa de preço pelo **Modelo Geral** e, quando aplicável, pelo **Modelo Popular** (carros das marcas mais vendidas no Brasil).
+A interface retorna a estimativa de preço pelo modelo selecionado, a média e o desvio padrão dos anúncios reais com os mesmos filtros, e um aviso caso a estimativa esteja fora do desvio padrão de mercado.
 
 ## Estrutura
 
 ```
 scrap-car-front/
-├── app.py              ← interface Streamlit
+├── app.py                      ← entrada: orquestra filtros, estimativa e anúncios
+├── components/
+│   ├── filtros.py              ← seleção em cascata + escolha do modelo
+│   ├── estimativa.py           ← chama /ml/prever e /ml/media, exibe resultado
+│   └── anuncios.py             ← lista anúncios reais com comparativo de preço
 ├── services/
-│   └── carro_service.py← regras e formatação
+│   └── carro_service.py        ← fachada entre components e api_client
 └── clients/
-    └── api_client.py   ← chamadas HTTP para a API
+    └── api_client.py           ← chamadas HTTP para a API
 ```
